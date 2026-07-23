@@ -19,6 +19,7 @@ class RetrievedChunk:
     page: int
     score: float
     images: List[str]  # list of image URLs associated with this chunk
+    models: List[str]  # list of 3D model URLs associated with this chunk
 
 
 def retrieve(query: str, subject: str | None = None, grade: str | None = None,
@@ -56,6 +57,7 @@ def retrieve(query: str, subject: str | None = None, grade: str | None = None,
             page=p["page"],
             score=hit.score,
             images=p.get("images", []),
+            models=p.get("models", []),
         ))
     return results
 

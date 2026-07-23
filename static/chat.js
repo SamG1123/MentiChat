@@ -186,19 +186,109 @@
             return;
           }
           panelEl.dataset.n = s.n;
-          // Build panel content: text and images
+          // Build panel content: text, images, and models
           let inner = `<b>[${s.n}] Class ${escapeHtml(s.grade)} ${escapeHtml(s.subject)} — ${escapeHtml(s.chapter)}</b><br>
             Page ${s.page} · ${escapeHtml(s.source_file)} · relevance ${s.score}`;
           if (s.images && s.images.length > 0) {
-            inner += "<br><br><strong>Images:</br>";
+            inner += "<br><br><strong>Images:</strong><br>";
             s.images.forEach(imgUrl => {
               inner += `<img src="${imgUrl}" alt="Illustration from page ${s.page}" style="max-width:100%; height:auto; margin-top:4px; border-radius:4px;">`;
             });
           }
+          if (s.models && s.models.length > 0) {
+            inner += "<br><br><strong>3D Models:</strong><br>";
+            s.models.forEach((modelUrl, index) => {
+              const modelId = `model-${s.n}-${index}`;
+              inner += `<div id="${modelId}" style="width:100%; height:300px; margin-top:8px; border:1px solid #ccc; border-radius:4px;"></div>`;
+            });
+          }
           panelEl.innerHTML = inner;
           panelEl.classList.add("open");
+
+          // Initialize 3D viewers for each model
+          if (s.models && s.models.length > 0) {
+            s.models.forEach((modelUrl, index) => {
+              const modelId = `model-${s.n}-${index}`;
+              const container = document.getElementById(modelId);
+              if (container) {
+                initModelViewer(container, modelUrl);
+              }
+            });
+          }
         });
         sourcesEl.appendChild(chip);
+      });
+    }
+
+    function initModelViewer(container, modelUrl) {
+      // If the container is not visible, we might need to resize later, but we'll handle via window resize
+      if (!container) return;
+
+      // Create a three.js scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf0f0f0);
+
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 1.5, 3);
+      camera.lookAt(0, 0, 0);
+
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
+      hemiLight.position.set(0, 20, 0);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff);
+      dirLight.position.set(-3, 10, -10);
+      dirLight.position.normalize();
+      scene.add(dirLight);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      container.appendChild(renderer.domElement);
+
+      // Load the model
+      let loader;
+      const lowerUrl = modelUrl.toLowerCase();
+      if (lowerUrl.endsWith('.glb') || lowerUrl.endsWith('.gltf')) {
+        loader = new THREE.GLTFLoader();
+      } else if (lowerUrl.endsWith('.obj')) {
+        loader = new THREE.OBJLoader();
+      } else {
+        container.textContent = 'Unsupported model format';
+        return;
+      }
+
+      loader.load(
+        modelUrl,
+        object => {
+          scene.add(object);
+        },
+        xhr => {
+          // Loading progress (optional)
+          // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        },
+        error => {
+          console.error('Error loading model:', error);
+          container.textContent = 'Failed to load model';
+        }
+      );
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
       });
     }
 

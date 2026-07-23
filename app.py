@@ -80,7 +80,7 @@ def home():
     return render_template("index.html", subjects=config.SUBJECTS, grades=config.GRADES)
 
 
-@app.route("/api/chat", methods=["POST"])
+@app.route("/api/chat", methods=["POST"]):
 def chat():
     data = request.get_json(force=True, silent=True) or {}
     question = (data.get("message") or "").strip()
@@ -117,6 +117,7 @@ def chat():
             "source_file": c.source_file,
             "score": round(c.score, 3),
             "images": c.images,  # list of image URLs
+            "models": c.models,  # list of 3D model URLs
         }
         for i, c in enumerate(chunks)
     ]
@@ -150,7 +151,7 @@ def chat():
                      headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
-@app.route("/api/reset", methods=["POST"])
+@app.route("/api/reset", methods=["POST"]):
 def reset():
     sid = get_session_id()
     HISTORY.pop(sid, None)

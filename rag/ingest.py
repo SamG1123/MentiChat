@@ -24,6 +24,13 @@ logger = logging.getLogger("ncert-tutor.ingest")
 IMG_DIR = Path("static") / "images"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
+# Directory where 3D model files are stored (served via Flask static)
+MODELS_DIR = Path("static") / "models"
+MODELS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Known 3D model extensions we look for
+MODEL_EXTENSIONS = {".glb", ".gltf", ".obj"}
+
 
 @dataclass
 class Chunk:
@@ -34,6 +41,7 @@ class Chunk:
     chapter: str
     page: int
     images: List[str]  # relative URLs to images, e.g., "/static/images/filename.png"
+    models: List[str]  # relative URLs to 3D models, e.g., "/static/models/filename.glb"
 
 
 def ensure_collection(client):
@@ -104,10 +112,45 @@ def _chunk_page_text(text: str, size: int, overlap: int) -> list[str]:
     return chunks
 
 
+def _get_associated_models(pdf_path: Path) -> List[str]:
+    """Return a list of URLs for 3D model files associated with the given PDF.
+
+    Looks for files in MODELS_DIR that start with the PDF's stem (without extension)
+    and have a known 3D extension.
+    """
+    model_urls = []
+    if not MODELS_DIR.exists():
+        return model_urls
+
+    stem = pdf_path.stem  # filename without extension
+    for ext in MODEL_EXTENSIONS:
+        # Pattern: stem_*ext or just stem+ext? We'll allow both.
+        # First, try exact stem + ext
+        model_path = MODELS_DIR / f"{stem}{ext}"
+        if model_path.is_file():
+            model_urls.append(f"/static/models/{model_path.name}")
+            continue
+        # Then try stem + _* + ext (e.g., stem_part1.glb)
+        for model_file in MODELS_DIR.glob(f"{stem}_*{ext}"):
+            if model_file.is_file():
+                model_urls.append(f"/static/models/{model_file.name}")
+        # Also try without underscore? Already tried exact stem.
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_urls = []
+    for url in model_urls:
+        if url not in seen:
+            seen.add(url)
+            unique_urls.append(url)
+    return unique_urls
+
+
 def load_pdf(path: Path, subject: str, grade: str, chapter: str | None = None) -> list[Chunk]:
     reader = PdfReader(str(path))
     chapter = chapter or path.stem
     chunks: list[Chunk] = []
+    # Get associated models for this PDF (same for all chunks from this PDF)
+    associated_models = _get_associated_models(path)
     for page_num, page in enumerate(reader.pages, start=1):
         raw = page.extract_text() or ""
         cleaned = _clean(raw)
@@ -147,6 +190,7 @@ def load_pdf(path: Path, subject: str, grade: str, chapter: str | None = None) -
                     chapter=chapter,
                     page=page_num,
                     images=page_images,
+                    models=associated_models,
                 )
             )
     return chunks
@@ -183,6 +227,7 @@ def ingest_pdf(path: Path, subject: str, grade: str, chapter: str | None = None,
                     "chapter": c.chapter,
                     "page": c.page,
                     "images": c.images,
+                    "models": c.models,
                 },
             )
             for c, vec in zip(batch, vectors)
