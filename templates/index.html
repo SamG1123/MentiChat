@@ -40,6 +40,18 @@
       {% endfor %}
     </nav>
 
+    <div class="rail-user-info">
+      {% if current_user.is_authenticated %}
+        <div class="rail-user">
+          <span class="rail-user-avatar">{{ current_user.username[0] | upper }}</span>
+          <span class="rail-user-name">{{ current_user.username }}</span>
+        </div>
+        <button class="rail-reset" id="logout-btn">Logout</button>
+      {% else %}
+        <button class="rail-reset" id="login-btn">Login</button>
+      {% endif %}
+    </div>
+
     <div class="rail-note">
       <p>Answers are grounded in your uploaded NCERT PDFs. Citations like <span class="tag-demo">[1]</span> point to the exact chapter and page.</p>
     </div>
