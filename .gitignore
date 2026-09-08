@@ -4,6 +4,7 @@ venv/
 .venv/
 env/
 .env
+.qdrant/
 data/pdfs/*.pdf
 .DS_Store
 *.log
