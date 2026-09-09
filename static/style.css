@@ -44,6 +44,70 @@ html, body {
   height: 100vh;
 }
 
+.auth-app {
+  display: block;
+  min-height: 100vh;
+}
+.auth-app .board {
+  min-height: 100vh;
+}
+.auth-app .board-header {
+  max-width: 560px;
+  margin: 0 auto;
+  width: 100%;
+}
+.auth-app .board-header h1,
+.auth-app .board-sub {
+  text-align: center;
+}
+.auth-thread {
+  width: min(100% - 40px, 440px);
+  margin: 20px auto;
+  padding: 10px 0 20px;
+}
+.auth-form {
+  width: 100%;
+}
+.auth-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(20, 20, 30, 0.06);
+}
+.auth-fields input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ecdfa8;
+  border-radius: 8px;
+  font: inherit;
+  color: var(--ink);
+  background: #fffdf7;
+}
+.auth-fields button {
+  width: 100%;
+  padding: 12px;
+  background: var(--rail);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+}
+.auth-switch {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.auth-switch a {
+  color: var(--accent-0);
+  text-decoration: none;
+}
+
 /* ---------------- Rail (sidebar) ---------------- */
 
 .rail {

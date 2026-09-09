@@ -10,14 +10,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="app">
+    <div class="app auth-app">
         <div class="board">
             <header class="board-header">
                 <h1>Create Account</h1>
                 <p class="board-sub">Join the learning community</p>
             </header>
 
-            <div class="thread" style="margin: 20px auto; max-width: 400px;">
+            <div class="thread auth-thread">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                   {% if messages %}
                     {% for category, message in messages %}
@@ -30,16 +30,16 @@
                   {% endif %}
                 {% endwith %}
 
-                <form method="POST" action="{{ url_for('register) }}" style="max-width: 400px; margin: 0 auto;">
-                    <div class="composer" style="flex-direction: column; gap: 16px;">
-                        <input type="text" id="username" name="username" placeholder="Choose a username" required style="width: 100%; padding: 12px; border: 1px solid #ecdfa8; border-radius: 8px; font-family: inherit; font-size: 15px;">
-                        <input type="password" id="password" name="password" placeholder="Create a password" required style="width: 100%; padding: 12px; border: 1px solid #ecdfa8; border-radius: 8px; font-family: inherit; font-size: 15px;">
-                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password" required style="width: 100%; padding: 12px; border: 1px solid #ecdfa8; border-radius: 8px; font-family: inherit; font-size: 15px;">
-                        <button type="submit" style="width: 100%; padding: 12px; background: var(--rail); color: white; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; cursor: pointer;">
+                <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+                    <div class="auth-fields">
+                        <input type="text" id="username" name="username" placeholder="Choose a username" required>
+                        <input type="password" id="password" name="password" placeholder="Create a password" required>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password" required>
+                        <button type="submit">
                             Create Account
                         </button>
-                        <p style="text-align: center; margin-top: 16px; font-size: 14px; color: var(--ink-soft);">
-                            Already have an account? <a href="{{ url_for('login') }}" style="color: var(--accent-0); text-decoration: none;">Sign in</a>
+                        <p class="auth-switch">
+                            Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
                         </p>
                     </div>
                 </form>
