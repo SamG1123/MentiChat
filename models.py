@@ -32,7 +32,7 @@ def _users_collection() -> Collection:
         )
 
     client = MongoClient(config.MONGODB_URI)
-    collection = client[config.MONGODB_DATABASE]["users"]
+    collection = client[config.MONGODB_DATABASE]["users_menti"]
     collection.create_index("username_key", unique=True, name="username_key_unique")
     return collection
 

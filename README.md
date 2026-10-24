@@ -45,7 +45,8 @@ Browser ──/api/chat──▶ Flask ──embed question──▶ Qdrant sear
   below `MIN_SCORE` are dropped so the model is told plainly "nothing relevant was
   found" instead of stretching a bad match into an answer.
 - **Accounts**: usernames and password hashes are stored in MongoDB Atlas. Passwords
-  are hashed before storage; configure `MONGODB_URI` and `MONGODB_DATABASE` in `.env`.
+  are hashed before storage in the app-specific `users_menti` collection; configure
+  `MONGODB_URI` and `MONGODB_DATABASE` in `.env`.
 - **Sessions**: a signed cookie identifies the browser session; a short rolling
   history (last 8 turns) is kept in memory to bound prompt size. This is
   process-local — fine for a single `flask run` / single Gunicorn worker demo.
