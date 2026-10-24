@@ -85,6 +85,15 @@ Fill in `.env`:
 Existing accounts in a local `users.json` are not imported; users must create a
 new account after connecting MongoDB.
 
+### Keep Qdrant Cloud active
+
+The GitHub Actions workflow in `.github/workflows/keep-qdrant-active.yml` sends a
+read-only request to Qdrant Cloud every Monday at 06:17 UTC. Add `QDRANT_URL` and
+`QDRANT_API_KEY` as repository Actions secrets under **Settings → Secrets and
+variables → Actions**. You can also run it manually from the **Actions** tab.
+This periodic request may help prevent inactivity cleanup, but does not override
+Qdrant Cloud's current retention policy or guarantee that a cluster will be kept.
+
 ### 3. Ingest your NCERT PDFs
 
 Put PDFs in `data/pdfs/` (or anywhere), then:

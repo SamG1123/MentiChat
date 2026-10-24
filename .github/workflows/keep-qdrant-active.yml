@@ -1,0 +1,30 @@
+name: Keep Qdrant Cloud active
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping-qdrant:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Qdrant Cloud
+        env:
+          QDRANT_URL: ${{ secrets.QDRANT_URL }}
+          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$QDRANT_URL" ]]; then
+            echo "Set the QDRANT_URL repository secret to your Qdrant Cloud cluster URL." >&2
+            exit 1
+          fi
+
+          args=(--fail --silent --show-error --max-time 30 --retry 3)
+          if [[ -n "$QDRANT_API_KEY" ]]; then
+            args+=(-H "api-key: $QDRANT_API_KEY")
+          fi
+          curl "${args[@]}" "${QDRANT_URL%/}/collections"
