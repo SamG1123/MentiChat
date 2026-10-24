@@ -159,8 +159,9 @@ def load_pdf(path: Path, subject: str, grade: str, chapter: str | None = None) -
 
         # Extract images from the page
         page_images: List[str] = []
-        if hasattr(page, "images") and page.images:
-            for img_idx, image_obj in enumerate(page.images):
+        try:
+            page_images_iter = page.images if hasattr(page, "images") else []
+            for img_idx, image_obj in enumerate(page_images_iter):
                 try:
                     img_data = image_obj.data  # raw bytes
                     # Determine file extension; default to .png
@@ -176,6 +177,8 @@ def load_pdf(path: Path, subject: str, grade: str, chapter: str | None = None) -
                     page_images.append(image_url)
                 except Exception as e:
                     logger.warning(f"Failed to extract image {img_idx} on page {page_num} of {path.name}: {e}")
+        except Exception as e:
+            logger.warning(f"Skipping unsupported images on page {page_num} of {path.name}: {e}")
 
         # Chunk the text
         for piece in _chunk_page_text(cleaned, config.CHUNK_SIZE_CHARS, config.CHUNK_OVERLAP_CHARS):
@@ -203,9 +206,10 @@ def _point_id(chunk: Chunk) -> str:
     return str(uuid.uuid5(uuid.NAMESPACE_URL, key))
 
 
-def ingest_pdf(path: Path, subject: str, grade: str, chapter: str | None = None, batch_size: int = 64) -> int:
+def ingest_pdf(path: Path, subject: str, grade: str, chapter: str | None = None, batch_size: int | None = None) -> int:
     client = get_client()
     ensure_collection(client)
+    batch_size = batch_size or config.QDRANT_BATCH_SIZE
 
     chunks = load_pdf(path, subject, grade, chapter)
     if not chunks:

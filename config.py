@@ -3,6 +3,7 @@
 Nothing secret lives in source code. Copy .env.example to .env and fill it in.
 """
 import os
+import secrets
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,11 +21,16 @@ class Config:
 
     QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
     QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY") or None
+    QDRANT_TIMEOUT = float(os.environ.get("QDRANT_TIMEOUT", "120"))
+    QDRANT_BATCH_SIZE = int(os.environ.get("QDRANT_BATCH_SIZE", "16"))
     QDRANT_PATH = os.environ.get("QDRANT_PATH", ".qdrant")
     QDRANT_COLLECTION = os.environ.get("QDRANT_COLLECTION", "ncert_chunks")
     EMBEDDING_DIM = 768  # embedding-001 / text-embedding-004 output size
 
-    FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
+    MONGODB_URI = _require("MONGODB_URI")
+    MONGODB_DATABASE = os.environ.get("MONGODB_DATABASE", "mentichat")
+
+    FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY") or secrets.token_hex(32)
     SUBJECTS = [s.strip() for s in os.environ.get("SUBJECTS", "Mathematics,Physics,Chemistry").split(",") if s.strip()]
     GRADES = [g.strip() for g in os.environ.get("GRADES", "11,12").split(",") if g.strip()]
 

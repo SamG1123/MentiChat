@@ -9,3 +9,10 @@ env/
 data/pdfs/*.pdf
 .DS_Store
 *.log
+users.json
+settings.json
+.vscode/
+.conda/
+*.png
+.claude/
+.vscode/

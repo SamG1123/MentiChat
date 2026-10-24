@@ -18,7 +18,11 @@ def _is_loopback_url(url: str) -> bool:
 
 def _build_client() -> QdrantClient:
     if config.QDRANT_URL:
-        remote_client = QdrantClient(url=config.QDRANT_URL, api_key=config.QDRANT_API_KEY)
+        remote_client = QdrantClient(
+            url=config.QDRANT_URL,
+            api_key=config.QDRANT_API_KEY,
+            timeout=config.QDRANT_TIMEOUT,
+        )
         try:
             remote_client.get_collections()
         except Exception:

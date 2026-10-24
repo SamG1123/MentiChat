@@ -11,10 +11,17 @@ import uuid
 import google.generativeai as genai
 from flask import Flask, Response, render_template, request, session, stream_with_context, redirect, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from pymongo.errors import PyMongoError
 
 from config import config
 from rag.retriever import retrieve, format_context
-from models import User, get_user_by_username, get_user_by_id, create_user
+from models import (
+    AuthenticationConfigurationError,
+    User,
+    create_user,
+    get_user_by_id,
+    get_user_by_username,
+)
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("ncert-tutor")
@@ -30,6 +37,16 @@ login_manager.login_view = 'login'  # type: ignore
 @login_manager.user_loader
 def load_user(user_id):
     return get_user_by_id(user_id)
+
+
+def _auth_storage_unavailable(template: str):
+    log.exception("MongoDB authentication request failed")
+    flash(
+        "Account storage is unavailable. Check MONGODB_URI and MongoDB Atlas network access.",
+        "error",
+    )
+    return render_template(template), 503
+
 
 genai.configure(api_key=config.GEMINI_API_KEY)
 
@@ -98,15 +115,20 @@ def login():
         return redirect(url_for('home'))
 
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
 
         if not username or not password:
             flash("Please provide both username and password", "error")
             return render_template("login.html")
 
-        user = get_user_by_username(username)
+        try:
+            user = get_user_by_username(username)
+        except (AuthenticationConfigurationError, PyMongoError):
+            return _auth_storage_unavailable("login.html")
+
         if user and user.check_password(password):
+            session.clear()
             login_user(user)
             return redirect(url_for('home'))
         else:
@@ -120,32 +142,47 @@ def register():
         return redirect(url_for('home'))
 
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        confirm_password = request.form.get("confirm_password")
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
 
         if not username or not password or not confirm_password:
             flash("Please fill in all fields", "error")
+            return render_template("register.html")
+
+        valid_username = (
+            3 <= len(username) <= 32
+            and username.isascii()
+            and username.replace("_", "").isalnum()
+        )
+        if not valid_username:
+            flash("Username must be 3–32 characters using letters, numbers, or underscores", "error")
+            return render_template("register.html")
+
+        if len(password) < 8:
+            flash("Password must be at least 8 characters", "error")
             return render_template("register.html")
 
         if password != confirm_password:
             flash("Passwords do not match", "error")
             return render_template("register.html")
 
-        if get_user_by_username(username):
+        try:
+            user = create_user(username, password)
+        except (AuthenticationConfigurationError, PyMongoError):
+            return _auth_storage_unavailable("register.html")
+
+        if user is None:
             flash("Username already exists", "error")
             return render_template("register.html")
 
-        user = create_user(username, password)
-        if user:
-            login_user(user)
-            return redirect(url_for('home'))
-        else:
-            flash("Registration failed", "error")
+        session.clear()
+        login_user(user)
+        return redirect(url_for('home'))
 
     return render_template("register.html")
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 @login_required
 def logout():
     logout_user()
@@ -225,6 +262,7 @@ def chat():
 
 
 @app.route("/api/reset", methods=["POST"])
+@login_required
 def reset():
     sid = get_session_id()
     HISTORY.pop(sid, None)

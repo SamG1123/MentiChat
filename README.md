@@ -44,6 +44,8 @@ Browser ──/api/chat──▶ Flask ──embed question──▶ Qdrant sear
 - **Retrieval**: cosine similarity, optional metadata filter by subject, results
   below `MIN_SCORE` are dropped so the model is told plainly "nothing relevant was
   found" instead of stretching a bad match into an answer.
+- **Accounts**: usernames and password hashes are stored in MongoDB Atlas. Passwords
+  are hashed before storage; configure `MONGODB_URI` and `MONGODB_DATABASE` in `.env`.
 - **Sessions**: a signed cookie identifies the browser session; a short rolling
   history (last 8 turns) is kept in memory to bound prompt size. This is
   process-local — fine for a single `flask run` / single Gunicorn worker demo.
@@ -72,6 +74,15 @@ Fill in `.env`:
   - **Local Docker**: `docker run -p 6333:6333 qdrant/qdrant`, then `QDRANT_URL=http://localhost:6333`, leave the API key blank.
   - **Local persistent fallback**: leave `QDRANT_URL` unset or let it fail over from `localhost`, and the app will use `.qdrant/` in the project root.
   - **Cloud**: create a free cluster at https://cloud.qdrant.io, paste its URL and API key.
+- `MONGODB_URI` — the MongoDB Atlas connection string. Create a database user and
+  allow the app's IP in Atlas Network Access. Keep this URI private in `.env`.
+- `MONGODB_DATABASE` — database name for user accounts (defaults to `mentichat`).
+- `FLASK_SECRET_KEY` — generate a stable secret with
+  `python -c "import secrets; print(secrets.token_hex(32))"` and keep it private.
+  If omitted, the app creates a temporary key and sessions will not survive restarts.
+
+Existing accounts in a local `users.json` are not imported; users must create a
+new account after connecting MongoDB.
 
 ### 3. Ingest your NCERT PDFs
 
@@ -151,8 +162,8 @@ static/chat.js           SSE streaming, markdown/KaTeX rendering, citations
 ## Known limitations / next steps
 
 - Session history is in-memory (see note above on Redis for multi-worker prod).
-- No auth — anyone with the URL can chat and burn API quota. Add a login or an
-  API-key gate before deploying publicly.
+- Chat requires a MongoDB-backed account. Protect the application with HTTPS and
+  set a strong, private `FLASK_SECRET_KEY` before deploying publicly.
 - `extract_text()` on scanned/image-only NCERT PDFs will return empty text; run
   those through OCR first (e.g. `ocrmypdf`) before ingesting.
 - The 15-word/one-quote-per-source copyright care that applies to Claude's own
