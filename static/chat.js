@@ -14,16 +14,24 @@
 
   subjectTabs.forEach(tab => {
     tab.addEventListener("click", () => {
-      subjectTabs.forEach(t => t.classList.remove("active"));
+      subjectTabs.forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-pressed", "false");
+      });
       tab.classList.add("active");
+      tab.setAttribute("aria-pressed", "true");
       activeSubject = tab.dataset.subject;
     });
   });
 
   gradeTabs.forEach(tab => {
     tab.addEventListener("click", () => {
-      gradeTabs.forEach(t => t.classList.remove("active"));
+      gradeTabs.forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-pressed", "false");
+      });
       tab.classList.add("active");
+      tab.setAttribute("aria-pressed", "true");
       activeGrade = tab.dataset.grade;
     });
   });
@@ -310,7 +318,7 @@
 
     function escapeHtml(str) {
       return str.replace(/[&<>"']/g, (c) => ({
-        "&": "&", "<": "<", ">": ">", '"': """, "'": "'",
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
       }[c]));
     }
 
@@ -325,5 +333,5 @@
         });
       }
     }
-  });
+  }
 })();

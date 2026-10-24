@@ -1,4 +1,4 @@
-# Doubt Desk — an NCERT RAG tutor
+# Menti Chat — an NCERT RAG tutor
 
 A rebuild of the original single-prompt Gemini chatbot into a retrieval-augmented
 tutor: it answers Maths/Physics/Chemistry questions grounded in your actual NCERT

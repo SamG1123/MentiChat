@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Doubt Desk — NCERT Tutor</title>
+<title>Menti Chat — NCERT Tutor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
@@ -20,23 +20,22 @@
 
   <aside class="rail">
     <div class="rail-brand">
-      <span class="rail-brand-mark">§</span>
-      <span class="rail-brand-text">Doubt&nbsp;Desk</span>
+      <span class="rail-brand-text">Menti Chat</span>
     </div>
 
     <div class="rail-label">Class</div>
     <nav class="tabs tabs-inline" id="grade-tabs">
-      <button class="tab active" data-grade">">...</button>
+      <button class="tab active" type="button" data-grade="all" aria-label="All classes" aria-pressed="true">All</button>
       {% for g in grades %}
-      <button class="tab" data-grade="{{ g }}">Class {{ g }}</button>
+      <button class="tab" type="button" data-grade="{{ g }}" aria-pressed="false">Class {{ g }}</button>
       {% endfor %}
     </nav>
 
     <div class="rail-label">Subject</div>
     <nav class="tabs" id="subject-tabs">
-      <button class="tab active" data-subject="all" style="--tab-accent: var(--ink)">All chapters</button>
+      <button class="tab active" type="button" data-subject="all" aria-pressed="true" style="--tab-accent: var(--ink)">All chapters</button>
       {% for s in subjects %}
-      <button class="tab" data-subject="{{ s }}" style="--tab-accent: var(--accent-{{ loop.index0 % 3 }})">{{ s }}</button>
+      <button class="tab" type="button" data-subject="{{ s }}" aria-pressed="false" style="--tab-accent: var(--accent-{{ loop.index0 % 3 }})">{{ s }}</button>
       {% endfor %}
     </nav>
 

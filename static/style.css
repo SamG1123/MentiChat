@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------
-   Doubt Desk — design system
+   Menti Chat — design system
    A study-desk / textbook-margin aesthetic: a dark "cover" rail on the
    left, warm ruled "paper" for the conversation, and subject-coded
    accent colors borrowed from a highlighter set (math / physics / chem).
@@ -156,9 +156,13 @@ html, body {
   gap: 6px;
 }
 .tabs-inline .tab {
+  flex: 1;
+  min-width: 0;
   padding: 6px 14px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.16);
+  text-align: center;
+  white-space: nowrap;
 }
 .tabs-inline .tab.active {
   padding-left: 14px;
