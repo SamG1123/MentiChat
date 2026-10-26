@@ -169,14 +169,7 @@ static/style.css         Design system
 static/chat.js           SSE streaming, markdown/KaTeX rendering, citations
 ```
 
-## Known limitations / next steps
+## Screenshot
 
-- Session history is in-memory (see note above on Redis for multi-worker prod).
-- Chat requires a MongoDB-backed account. Protect the application with HTTPS and
-  set a strong, private `FLASK_SECRET_KEY` before deploying publicly.
-- `extract_text()` on scanned/image-only NCERT PDFs will return empty text; run
-  those through OCR first (e.g. `ocrmypdf`) before ingesting.
-- The 15-word/one-quote-per-source copyright care that applies to Claude's own
-  answers doesn't apply here — this app is quoting *your own* textbook content
-  back to you for study purposes, which is a different situation. Still, don't
-  redistribute the ingested PDFs themselves.
+<img width="2796" height="1580" alt="image" src="https://github.com/user-attachments/assets/e782015a-6247-4045-9fef-e8a8e1594a1d" />
+
